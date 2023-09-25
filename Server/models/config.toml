@@ -1,0 +1,31 @@
+[https]
+ListenIp = "0.0.0.0"
+ListenPort = 8000
+
+[https.tls]
+cert = "./certs/fullchain.pem"
+key = "./certs/privkey.key"
+
+[mediasoup]
+numWorkers = 1
+
+[mediasoup.webRtcTransportOptions]
+listenIps = [{ip = "127.0.0.1", announcedIp = "127.0.0.1"}]
+
+[mediasoup.plainTransportOptions.listenIp]
+ip = "127.0.0.1"
+announcedIp = "127.0.0.1"
+
+[Postgresql]
+UserName = "postgres"
+Password = "mysecretpassword"
+Host = "some-postgres"
+Port = 5432
+DatabaseName = "postgres"
+DatabaseType = "postgres"
+
+[Redirection]
+SsoServer = "https://sso.jubo.health"
+MediasoupServer = "http://localhost:4443"
+RedirectUrl = "/?url=localhost:4443/signin"
+MediasoupUrl = "/web/?info=true"
