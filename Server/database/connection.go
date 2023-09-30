@@ -1,12 +1,14 @@
 package database
 
 import (
-	"encoding/json"
-	"fmt"
 	"upload-and-download-file/models"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 var GDB *GormDatabase
+
+const SecretKey = "secret"
 
 func Connect() *GormDatabase {
 	// Alvin: Data from config.go
@@ -21,41 +23,41 @@ func Connect() *GormDatabase {
 		config.Postgresql.DatabaseType,
 	)
 
-	PrettyPrint(config.Postgresql.UserName)
-	PrettyPrint(config.Postgresql.Password)
-	PrettyPrint(config.Postgresql.Host)
-	PrettyPrint(config.Postgresql.Port)
-	PrettyPrint(config.Postgresql.DatabaseName)
-	PrettyPrint(config.Postgresql.DatabaseType)
-
 	if err != nil {
 		panic("could not connect to the database")
 	}
 
-	if GDB == nil {
-		panic("fail to connect database")
-	} else if GDB != nil {
-		fmt.Printf("successfully connect to postgres ...\n")
+	// CreateTable will create tables if they don't exist
+	if err := GDB.CreateTable(&models.User{}); err != nil {
+		panic("could not create user table")
 	}
 
-	//DB = connection
 	// CreateTable will create tables if they don't exist
-	GDB.CreateTable(&models.User{})
-	if err != nil {
-		panic("could not create table")
+	if err := GDB.CreateTable(&models.StroeData{}); err != nil {
+		panic("could not create storedata table")
+	}
+
+	// Check if adminstrator already existed.
+	if err := GDB.GetCorresponding(&models.User{}, "email = ?", config.Admin.Email); err != nil {
+
+		// Create adminstrator
+		password, err := bcrypt.GenerateFromPassword(config.Admin.Password, 14)
+
+		if err != nil {
+			panic(err)
+		}
+
+		adminUser := models.User{
+			Name:     config.Admin.Name,
+			Email:    config.Admin.Email,
+			Password: password,
+			Admin:    config.Admin.Admin,
+		}
+
+		if err := GDB.Create(&adminUser); err != nil {
+			panic("could not create adminstrator")
+		}
 	}
 
 	return GDB
-}
-
-// print the contents of the obj
-func PrettyPrint(data interface{}) {
-	var p []byte
-	//    var err := error
-	p, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Printf("%s \n", p)
 }

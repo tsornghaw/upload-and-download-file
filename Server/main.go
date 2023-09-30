@@ -44,6 +44,4 @@ func main() {
 	server := routes.NewServer(config)
 	server.Run()
 
-	// routes.Setup(app)
-
 }

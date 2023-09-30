@@ -12,7 +12,7 @@ function App() {
     useEffect(() => {
         (
             async () => {
-                const response = await fetch('http://localhost:8000/api/user', {
+                const response = await fetch('http://localhost:8000/api/auth/user', {
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                 });
@@ -22,7 +22,7 @@ function App() {
                 setName(content.name);
             }
         )();
-    });
+    }, []);
 
 
     return (
