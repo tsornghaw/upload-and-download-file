@@ -44,7 +44,7 @@ func (s *Server) Run() {
 		//api.GET("/user", s.User)
 
 		// File upload and download (Authenticated APIs)
-		authr := api.Group("/auth")
+		authr := api.Group("/auth", s.AuthMiddleware())
 		{
 			authr.GET("/user", s.User)
 			authr.POST("/logout", s.Logout)
@@ -58,7 +58,7 @@ func (s *Server) Run() {
 				adminr.GET("/SearchAllUsers", s.SearchAllUsers)
 				adminr.GET("/SearchAllData", s.SearchAllData)
 				adminr.DELETE("/deleteuser", s.DeleteUsers)
-				adminr.DELETE("/deletedata", s.DeleteDatas)
+				adminr.DELETE("/deletedata", s.DeleteData)
 			}
 		}
 	}

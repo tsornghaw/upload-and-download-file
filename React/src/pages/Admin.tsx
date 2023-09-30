@@ -7,7 +7,8 @@ type DataItem = {
     download_url: string;
   };
 
-const Home = (props: { name: string }) => {
+const Admin = (props: { name: string }) => {
+    console.log("Admin name : " + props.name)
     const [fileList, setFileList] = useState<FileList | null>(null);
     const [selectedImage, setSelectedImage] = useState('');
 
@@ -105,6 +106,46 @@ const Home = (props: { name: string }) => {
         });
     }
 
+    const handleDelete = (downloadUrl: string) => {
+        // Make an API call to delete data using downloadUrl
+        fetch(`http://localhost:8000/api/auth/admin/deletedata`, {
+            method: 'DELETE', // Use the appropriate HTTP method
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ download_url: downloadUrl }),
+            credentials: 'include',
+        })
+        .then((response) => {
+            if (response.status === 200) {
+            // Data deleted successfully, you can update the UI as needed
+            // For example, you can remove the corresponding option from the options array
+            // Update the options array or re-fetch the data
+            console.log('Data deleted successfully');
+            } else {
+            // Handle error if the deletion request was not successful
+            console.error('Failed to delete data');
+            }
+        })
+        .catch((error) => {
+            console.error('Error deleting data:', error);
+        });
+
+        // Re-fetch data and update options when the button is clicked
+        fetch('http://localhost:8000/api/auth/UserSearchAllData', {
+            credentials: 'include',
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            // Assuming the API response is an array of objects with 'value' and 'label' properties
+            setOptions(data);
+            console.log(data)
+        })
+        .catch((error) => {
+            console.error('Error fetching data from the API:', error);
+        });
+    };
+
     // Use the useEffect hook to fetch data from the API when the component mounts
     useEffect(() => {
         // Replace 'your-api-endpoint' with the actual API endpoint URL
@@ -126,8 +167,33 @@ const Home = (props: { name: string }) => {
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedOption(event.target.value);
     };
-
     
+    const tableStyle: React.CSSProperties = {
+        width: '100%', // Set the table width to 100%
+        borderCollapse: 'collapse', // Merge adjacent cell borders
+        border: '1px solid #ccc', // Add a border to the table
+    };
+
+    const thStyle: React.CSSProperties = {
+        backgroundColor: '#f2f2f2',
+        padding: '10px',
+        border: '1px solid #000', // Add a border to table header cells
+    };
+    
+    const tdStyle: React.CSSProperties = {
+        padding: '8px',
+        border: '1px solid #ccc',
+    };
+
+    const buttonStyleadmin: React.CSSProperties = {
+        backgroundColor: '#007bff', // Blue background color
+        color: '#fff', // White text color
+        padding: '10px 20px', // Padding around the text
+        border: 'none', // Remove the default button border
+        borderRadius: '4px', // Add rounded corners
+        cursor: 'pointer', // Change cursor to a pointer on hover
+    };
+
     return (
         <div>
             {props.name ? 
@@ -180,6 +246,29 @@ const Home = (props: { name: string }) => {
                             onChange={(e) => setFileName(e.target.value)}
                         /> */}
                         {/* <button onClick={handleDownload}>Download File</button> */}
+
+                        <table style={tableStyle}>
+                            <thead>
+                            <tr>
+                                <th style={thStyle}>filename</th>
+                                <th style={thStyle}>download_url</th>
+                                <th style={thStyle}>edit_button</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                {options.map((option) => (
+                                    <tr key={option.dataname}>
+                                        <td style={tdStyle}>{option.dataname}</td>
+                                        <td style={tdStyle}>"http://localhost:8000/" + {option.download_url}</td>
+                                        <td style={tdStyle}>
+                                            <button style={buttonStyleadmin} onClick={() => handleDelete(option.download_url)}>
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </React.Fragment>
                 )
                 :
@@ -192,7 +281,7 @@ const Home = (props: { name: string }) => {
     );
 }
 
-export default Home;
+export default Admin;
 
 
 function setSelectedImage(arg0: string) {

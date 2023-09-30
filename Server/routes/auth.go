@@ -22,7 +22,7 @@ func (s *Server) CORS() gin.HandlerFunc {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 		if c.Request.Method == "OPTIONS" {
 			c.AbortWithStatus(204) // No Content for preflight requests
 			return
@@ -71,6 +71,8 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
+	PrettyPrint(data)
+
 	// Retrieve user from your database
 	var user models.User
 
@@ -79,13 +81,14 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
+	PrettyPrint(user)
+
 	if user.Id == 0 {
 		c.JSON(404, gin.H{"message": "User not found"})
 		return
 	}
 
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(data["password"])); err != nil {
-		PrettyPrint(err)
 		c.JSON(400, gin.H{"message": "Incorrect password"})
 		return
 	}
@@ -98,7 +101,7 @@ func (s *Server) Login(c *gin.Context) {
 
 	// TODO: Use Header Authrization to create JWT
 	// https://ithelp.ithome.com.tw/articles/10278153
-	c.SetCookie("jwt", token, 3600, "/", "localhost", false, true)
+	c.SetCookie("jwt", token, 3600, "/", "http:/localhost:3000/", false, false)
 	//c.JSON(200, gin.H{"message": "Success"})
 	c.JSON(200, gin.H{"name": user.Name})
 }
@@ -109,6 +112,7 @@ func (s *Server) User(c *gin.Context) {
 	cookie, err := c.Cookie("jwt")
 	PrettyPrint(cookie)
 	if cookie == "" || err != nil {
+		PrettyPrint("Unauthenticated1")
 		c.JSON(401, gin.H{"message": "Unauthenticated"})
 		return
 	}
@@ -117,6 +121,7 @@ func (s *Server) User(c *gin.Context) {
 	PrettyPrint("claims : ")
 	PrettyPrint(claims)
 	if err != nil {
+		PrettyPrint("Unauthenticated2")
 		c.JSON(401, gin.H{"message": "Unauthenticated"})
 		return
 	}
@@ -131,7 +136,7 @@ func (s *Server) User(c *gin.Context) {
 
 func (s *Server) Logout(c *gin.Context) {
 	log.Printf("Start Logout\n")
-	c.SetCookie("jwt", "", -1, "/", "localhost", false, true)
+	c.SetCookie("jwt", "", -1, "/", "http:/localhost:3000/", false, false)
 	c.JSON(200, gin.H{"message": "Success"})
 }
 

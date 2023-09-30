@@ -2,8 +2,9 @@ import React, {useEffect, useState} from 'react';
 import './App.css';
 import Login from "./pages/Login";
 import Nav from "./components/Nav";
-import {BrowserRouter, Route} from "react-router-dom";
+import {BrowserRouter, Route, Redirect} from "react-router-dom";
 import Home from "./pages/Home";
+import Admin from "./pages/Admin";
 import Register from "./pages/Register";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
                     headers: {'Content-Type': 'application/json'},
                     credentials: 'include',
                 });
+                console.log(name)
 
                 const content = await response.json();
 
@@ -30,10 +32,25 @@ function App() {
             <BrowserRouter>
                 <Nav name={name} setName={setName}/>
 
-                <main className="form-signin">
+                {/* <main className="form-signin">
                     <Route path="/" exact component={() => <Home name={name}/>}/>
                     <Route path="/login" component={() => <Login setName={setName}/>}/>
                     <Route path="/register" component={Register}/>
+                </main> */}
+                <main className="form-signin">
+                    <Route path="/" exact component={() => <Home name={name} />} />
+                    <Route path="/login" component={() => <Login setName={setName} />} />
+                    <Route path="/register" component={Register} />
+
+                    {/* Conditional Redirect */}
+                    {name === "admin" ? (
+                        <Redirect from="/" to="/admin" />
+                    ) : (
+                        <Redirect from="/" to="/home" />
+                    )}
+
+                    <Route path="/admin" component={() => <Admin name={name} />} />
+                    {/* <Route path="/home" component={Home} /> */}
                 </main>
             </BrowserRouter>
         </div>

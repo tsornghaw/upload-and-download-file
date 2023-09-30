@@ -103,12 +103,16 @@ func (s *Server) Download(c *gin.Context) {
 	localFilePath := homeDir + string(os.PathSeparator) + file.FileName
 
 	PrettyPrint(localFilePath)
+	PrettyPrint(localFilePath)
+	PrettyPrint(localFilePath)
 
 	// Create and write the decoded file to the local directory
 	if err := writeToFile(localFilePath, decoded); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save the file"})
+		PrettyPrint("Failed to save the file")
 	} else {
 		c.JSON(http.StatusOK, gin.H{"message": "File downloaded and stored successfully"})
+		PrettyPrint("File downloaded and stored successfully")
 	}
 }
 
@@ -213,6 +217,33 @@ func writeToFile(filePath string, data []byte) error {
 
 	_, err = file.Write(data)
 	return err
+}
+
+func (s *Server) DeleteData(c *gin.Context) {
+	var dataitem models.DataItem
+	var data []models.StroeData
+
+	if err := c.ShouldBindJSON(&dataitem); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
+		return
+	}
+
+	if err := s.gd.GetCorresponding(&data, "download_url = ?", dataitem.DownloadURL); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No Id existed in database"})
+	}
+
+	if reflect.ValueOf(data).IsZero() {
+		c.JSON(http.StatusNotFound, gin.H{"message": "User data does not exist!"})
+		return
+	}
+
+	// Delete data by their IDs
+	if err := s.gd.Delete(&data); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete data"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "data deleted successfully"})
 }
 
 func (s *Server) DeleteDatas(c *gin.Context) {
