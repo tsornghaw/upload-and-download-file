@@ -62,7 +62,11 @@ Create a navigation menu for easy page navigation. We'll include links for 'Home
 ![image info](./Demo/Upload.png)
 * Download
 ![image info](./Demo/Download.png)
+1. Provide an upload block. If the upload is successful, there will be a display network.
+2. For uploaded files, you can choose a limit on the number of times (1 to 10 times)
 
 ### Administrator
 * Admin
 ![image info](./Demo/Download.png)
+1. Provide a screen where you can browse the file information list, delete files, and add files
+2. The file must have information such as upload time, sharing time, number of shares, file size, file name, file type, etc.
