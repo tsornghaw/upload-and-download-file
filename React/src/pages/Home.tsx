@@ -1,24 +1,21 @@
-import React, { ChangeEvent, ChangeEventHandler, useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { ChangeEvent, ChangeEventHandler, useEffect, useRef, useState } from 'react';
 
-// Define a type for your data
 type DataItem = {
     dataname: string;
     download_url: string;
+    share_limti: number;
   };
 
 const Home = (props: { name: string }) => {
+    
+    // Define a state variable to store the options fetched from the API
     const [fileList, setFileList] = useState<FileList | null>(null);
     const [selectedImage, setSelectedImage] = useState('');
-
-    // Define a state variable to store the options fetched from the API
     const [options, setOptions] = useState<DataItem[]>([]);
-
-    // Define a state variable to store the selected option
-    const [selectedOption, setSelectedOption] = useState<string>("");
-
+    const [selectedOption, setselectedOption] = useState<string>("");
     const [downloadmessage, setdownloadMessage] = useState('');
     const [uploadmessage, setuploadMessage] = useState('');
+    const [downloadTimes, setDownloadTimes] = useState(5);
 
     const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         setFileList(e.target.files);
@@ -33,24 +30,11 @@ const Home = (props: { name: string }) => {
 
     const handleDownload = async () => {
         if (selectedOption) {
-            // Implement the API call to download here
-            console.log('Downloading : ' + selectedOption);
             const download_url = 'http://localhost:8000/api/auth/download/' + selectedOption
-            // You can use fetch or any other library to make the API call
             try {
                 const response = await fetch(download_url, {
                     credentials: 'include',
                 });
-                //const blob = await response.blob();
-
-                // Create a URL for the blob data and trigger a download
-                // const url = window.URL.createObjectURL(blob);
-                // const a = document.createElement('a');
-                // a.href = url;
-                // a.download = 'test.png'; // Set the desired filename
-                // document.body.appendChild(a);
-                // a.click();
-                // window.URL.revokeObjectURL(url);
 
                 if (response.ok) {
                     // The download was successful, set a success message
@@ -74,7 +58,9 @@ const Home = (props: { name: string }) => {
         }
         const formData = new FormData()
         formData.append(`file`, fileList[0], fileList[0].name)
-        console.log(fileList[0])
+        formData.append('downloadTimes', downloadTimes.toString());
+        console.log(downloadTimes)
+
         fetch('http://localhost:8000/api/auth/upload', {
             method: 'POST',
             body: formData,
@@ -82,11 +68,11 @@ const Home = (props: { name: string }) => {
         })
         .then((response) => {
             if (response.ok) {
-              // Upload successful, set success message
-              setuploadMessage('File uploaded successfully');
-              return response.json();
+                // Upload successful, set success message
+                setuploadMessage('File uploaded successfully');
+                return response.json();
             } else {
-              throw new Error('Upload failed');
+                throw new Error('Upload failed');
             }
           })
 
@@ -96,9 +82,7 @@ const Home = (props: { name: string }) => {
         })
         .then((response) => response.json())
         .then((data) => {
-            // Assuming the API response is an array of objects with 'value' and 'label' properties
             setOptions(data);
-            console.log(data)
         })
         .catch((error) => {
             console.error('Error fetching data from the API:', error);
@@ -107,15 +91,12 @@ const Home = (props: { name: string }) => {
 
     // Use the useEffect hook to fetch data from the API when the component mounts
     useEffect(() => {
-        // Replace 'your-api-endpoint' with the actual API endpoint URL
         fetch('http://localhost:8000/api/auth/UserSearchAllData', {
             credentials: 'include',
         })
         .then((response) => response.json())
         .then((data) => {
-            // Assuming the API response is an array of objects with 'value' and 'label' properties
             setOptions(data);
-            console.log(data)
         })
         .catch((error) => {
             console.error('Error fetching data from the API:', error);
@@ -124,7 +105,12 @@ const Home = (props: { name: string }) => {
 
     // Handle the selection change
     const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedOption(event.target.value);
+        setselectedOption(event.target.value);
+    };
+
+    const handleRangeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        // Update the state with the current range value
+        setDownloadTimes(parseInt(event.target.value, 10));
     };
 
     
@@ -145,24 +131,19 @@ const Home = (props: { name: string }) => {
                             />
                         )}
                         <br />
-                        {/* <input type="submit" /> */}
+                        <label htmlFor="vol">Download Times (between 0 and 10):</label>
+                        <input type="range" id="vol" name="vol" min="0" max="10" value={downloadTimes} onChange={handleRangeChange}></input>
+                        <p>Selected Value: {downloadTimes}</p>
+                        <br />
                         <button onClick={handleUpload}>Submit</button>
                         <p>{uploadmessage}</p>
                         <br />
 
-
                         {/* If Authenticated - Download */}
                         <label>Select an option: </label>
                         <select value={selectedOption} onChange={handleSelectChange}>
-                            {/* <option value="">Select an option</option>
-                            {options.map((option) => (
-                            <option key={option.dataname} value={option.download_url}>
-                                {option.dataname}
-                            </option>
-                            ))} */}
-
                         <option value="">Select an option</option>
-                        {options.map((option, index) => (
+                        {options && options.map((option, index) => (
                             <option key={option.dataname + index} value={option.download_url}>
                             {option.dataname}
                             </option>
@@ -171,15 +152,7 @@ const Home = (props: { name: string }) => {
                         {selectedOption && <p>Selected option: {selectedOption}</p>}
                         <button onClick={handleDownload}>Download File</button>
                         <p>{downloadmessage}</p>
-
                         <br  />
-                        {/* <input
-                            type="text"
-                            placeholder="Enter file name"
-                            value={fileName}
-                            onChange={(e) => setFileName(e.target.value)}
-                        /> */}
-                        {/* <button onClick={handleDownload}>Download File</button> */}
                     </React.Fragment>
                 )
                 :

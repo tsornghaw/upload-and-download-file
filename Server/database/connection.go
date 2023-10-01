@@ -1,6 +1,7 @@
 package database
 
 import (
+	"reflect"
 	"upload-and-download-file/models"
 
 	"golang.org/x/crypto/bcrypt"
@@ -38,25 +39,30 @@ func Connect() *GormDatabase {
 	}
 
 	// Check if adminstrator already existed.
-	if err := GDB.GetCorresponding(&models.User{}, "email = ?", config.Admin.Email); err != nil {
+	var adminUser []models.User
 
-		// Create adminstrator
-		password, err := bcrypt.GenerateFromPassword(config.Admin.Password, 14)
+	if err := GDB.GetCorresponding(&adminUser, "email = ?", config.Admin.Email); err != nil {
 
-		if err != nil {
-			panic(err)
+		if reflect.ValueOf(adminUser).IsZero() {
+			// Create adminstrator
+			password, err := bcrypt.GenerateFromPassword(config.Admin.Password, 14)
+
+			if err != nil {
+				panic(err)
+			}
+
+			adminUser := models.User{
+				Name:     config.Admin.Name,
+				Email:    config.Admin.Email,
+				Password: password,
+				Admin:    config.Admin.Admin,
+			}
+
+			if err := GDB.Create(&adminUser); err != nil {
+				panic("could not create adminstrator")
+			}
 		}
 
-		adminUser := models.User{
-			Name:     config.Admin.Name,
-			Email:    config.Admin.Email,
-			Password: password,
-			Admin:    config.Admin.Admin,
-		}
-
-		if err := GDB.Create(&adminUser); err != nil {
-			panic("could not create adminstrator")
-		}
 	}
 
 	return GDB

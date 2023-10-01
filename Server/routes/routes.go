@@ -30,18 +30,11 @@ func (s *Server) Run() {
 	// CORS configuration
 	r.Use(s.CORS())
 
-	// // Logging middleware
-	// r.Use(func(c *gin.Context) {
-	// 	log.Printf("Received request from %s %s\n", c.Request.Method, c.FullPath())
-	// 	c.Next()
-	// })
-
 	// User registration and login APIs (no authentication)
 	api := r.Group("/api")
 	{
 		api.POST("/register", s.Register)
 		api.POST("/login", s.Login)
-		//api.GET("/user", s.User)
 
 		// File upload and download (Authenticated APIs)
 		authr := api.Group("/auth", s.AuthMiddleware())

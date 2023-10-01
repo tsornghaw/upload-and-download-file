@@ -26,17 +26,10 @@ function App() {
         )();
     }, []);
 
-
     return (
         <div className="App">
             <BrowserRouter>
                 <Nav name={name} setName={setName}/>
-
-                {/* <main className="form-signin">
-                    <Route path="/" exact component={() => <Home name={name}/>}/>
-                    <Route path="/login" component={() => <Login setName={setName}/>}/>
-                    <Route path="/register" component={Register}/>
-                </main> */}
                 <main className="form-signin">
                     <Route path="/" exact component={() => <Home name={name} />} />
                     <Route path="/login" component={() => <Login setName={setName} />} />
@@ -46,11 +39,10 @@ function App() {
                     {name === "admin" ? (
                         <Redirect from="/" to="/admin" />
                     ) : (
-                        <Redirect from="/" to="/home" />
+                        <Redirect from="/" to="/" />
                     )}
 
                     <Route path="/admin" component={() => <Admin name={name} />} />
-                    {/* <Route path="/home" component={Home} /> */}
                 </main>
             </BrowserRouter>
         </div>

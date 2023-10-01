@@ -19,7 +19,6 @@ type User struct {
 	Email    string `json:"email" gorm:"unique"`
 	Password []byte `json:"password,omitempty"`
 	Admin    bool   `jsom:"admin,omitempty" gorm:"column:admin"`
-	//FrontendIDs FrontendRequest `json:"frontend_ids,omitempty"`
 }
 
 type StroeData struct {
@@ -32,20 +31,12 @@ type StroeData struct {
 	FileType    string    `json:"file_type,omitempty"`
 	FileContent string    `json:"file_content,omitempty"`
 	DownloadUrl string    `json:"download_url,omitempty"`
-	//FrontendIDs FrontendRequest `json:"frontend_ids,omitempty"`
-	// TODO: Add one more column : owner
-
 }
 
 type DataItem struct {
 	Dataname    string `json:"dataname"`
 	DownloadURL string `json:"download_url"`
 }
-
-// type ShortURL struct {
-// 	OriginalURL string `json:"original_url" gorm:"unique"`
-// 	ShortURL    string `json:"shorten_url" gorm:"unique"`
-// }
 
 type HTTPSConfig struct {
 	ListenIp   string    `json:"listenIP,omitempty"`

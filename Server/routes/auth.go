@@ -1,8 +1,6 @@
 package routes
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -71,8 +69,6 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
-	PrettyPrint(data)
-
 	// Retrieve user from your database
 	var user models.User
 
@@ -80,8 +76,6 @@ func (s *Server) Login(c *gin.Context) {
 		c.JSON(400, gin.H{"message": err})
 		return
 	}
-
-	PrettyPrint(user)
 
 	if user.Id == 0 {
 		c.JSON(404, gin.H{"message": "User not found"})
@@ -99,10 +93,9 @@ func (s *Server) Login(c *gin.Context) {
 		return
 	}
 
-	// TODO: Use Header Authrization to create JWT
-	// https://ithelp.ithome.com.tw/articles/10278153
+	// Use Header Authrization to create JWT
 	c.SetCookie("jwt", token, 3600, "/", "http:/localhost:3000/", false, false)
-	//c.JSON(200, gin.H{"message": "Success"})
+
 	c.JSON(200, gin.H{"name": user.Name})
 }
 
@@ -110,18 +103,15 @@ func (s *Server) User(c *gin.Context) {
 	log.Printf("Start User\n")
 
 	cookie, err := c.Cookie("jwt")
-	PrettyPrint(cookie)
+
 	if cookie == "" || err != nil {
-		PrettyPrint("Unauthenticated1")
 		c.JSON(401, gin.H{"message": "Unauthenticated"})
 		return
 	}
 
 	claims, err := ValidateToken(cookie)
-	PrettyPrint("claims : ")
-	PrettyPrint(claims)
+
 	if err != nil {
-		PrettyPrint("Unauthenticated2")
 		c.JSON(401, gin.H{"message": "Unauthenticated"})
 		return
 	}
@@ -180,16 +170,4 @@ func ValidateToken(cookie string) (*jwt.StandardClaims, error) {
 	}
 
 	return nil, err
-}
-
-// print the contents of the obj
-func PrettyPrint(data interface{}) {
-	var p []byte
-	//    var err := error
-	p, err := json.MarshalIndent(data, "", "\t")
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	fmt.Printf("%s \n", p)
 }

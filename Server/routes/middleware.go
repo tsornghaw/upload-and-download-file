@@ -11,9 +11,6 @@ func (s *Server) AuthMiddleware() gin.HandlerFunc {
 
 		cookie, err := c.Cookie("jwt")
 
-		PrettyPrint(cookie)
-		PrettyPrint(err)
-
 		if cookie == "" || err != nil {
 			c.JSON(401, gin.H{"message": "Unauthenticated 1"})
 			c.Abort()
